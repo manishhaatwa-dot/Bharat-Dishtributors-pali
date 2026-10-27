@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // GitHub repository settings
     const GITHUB_OWNER = "manishhaatwa-dot";
-    const GITHUB_REPO = "Bharat-Distributors";
+    const GITHUB_REPO = "Bharat-Dishtributors-pali";
     const GITHUB_BRANCH = "main";
 
     // Product folders and their HTML containers
