@@ -1,7 +1,7 @@
 {
   "cello": [
     "assets/products/cello/a.jpg",
-    "assets/products/cello/b.jpg",
+    "assets/products/cello/B.jpg",
     "assets/products/cello/c.jpg",
     "assets/products/cello/d.jpg"
   ],
@@ -30,6 +30,8 @@
     "assets/products/ritu/all type ritu brand products.jpg"
   ],
   "other": [
-    "assets/products/other/A.jpg"
+    "assets/products/other/a.jpg",
+    "assets/products/other/b.jpg",
+    "assets/products/other/c.jpg"
   ]
 }
