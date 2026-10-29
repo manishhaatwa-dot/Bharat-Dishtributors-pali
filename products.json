@@ -1,54 +1,37 @@
-$root = (Get-Location).Path
-$productRoot = Join-Path $root "assets\products"
-
-$extensions = @(".jpg", ".jpeg", ".png", ".webp", ".gif")
-
-$products = [ordered]@{
-    cello   = @()
-    bluline = @()
-    patel   = @()
-    pearl   = @()
-    aera    = @()
-    ritu    = @()
-    other   = @()
-}
-
-if (-not (Test-Path $productRoot)) {
-    Write-Host "ERROR: assets\products folder nahi mila."
-    Write-Host "PowerShell ko website ke main folder mein kholo."
-    return
-}
-
-Get-ChildItem -Path $productRoot -Recurse -File |
-Where-Object {
-    $extensions -contains $_.Extension.ToLowerInvariant()
-} |
-ForEach-Object {
-    $relative = $_.FullName.Substring($root.Length + 1).Replace("\", "/")
-    $parts = $relative.Split("/")
-
-    if ($parts.Length -ge 4) {
-        $category = $parts[2].ToLowerInvariant()
-
-        if ($products.Contains($category)) {
-            $products[$category] += $relative
-        }
-    }
-}
-
-$json = $products | ConvertTo-Json -Depth 10
-$outFile = Join-Path $root "products.json"
-
-[System.IO.File]::WriteAllText(
-    $outFile,
-    $json,
-    (New-Object System.Text.UTF8Encoding($false))
-)
-
-Write-Host ""
-Write-Host "SUCCESS! products.json ban gayi."
-Write-Host "Image counts:"
-
-foreach ($category in $products.Keys) {
-    Write-Host "$category : $($products[$category].Count)"
+{
+  "cello": [
+    "assets/products/cello/A.jpg",
+    "assets/products/cello/B.jpg",
+    "assets/products/cello/c.jpg",
+    "assets/products/cello/d.jpg"
+  ],
+  "bluline": [
+    "assets/products/bluline/a.jpg",
+    "assets/products/bluline/b.jpg",
+    "assets/products/bluline/c.jpg",
+    "assets/products/bluline/d.jpg"
+  ],
+  "patel": [
+    "assets/products/patel/a.jpg",
+    "assets/products/patel/b.jpg",
+    "assets/products/patel/c.jpg",
+    "assets/products/patel/d.jpg"
+  ],
+  "pearl": [
+    "assets/products/pearl/a.jpg",
+    "assets/products/pearl/b.jpg",
+    "assets/products/pearl/c.jpg",
+    "assets/products/pearl/d.jpg"
+  ],
+  "aera": [
+    "assets/products/aera/All Type Aera product.jpg"
+  ],
+  "ritu": [
+    "assets/products/ritu/all type ritu brand products.jpg"
+  ],
+  "other": [
+    "assets/products/other/a.jpg",
+    "assets/products/other/b.jpg",
+    "assets/products/other/c.jpg"
+  ]
 }
