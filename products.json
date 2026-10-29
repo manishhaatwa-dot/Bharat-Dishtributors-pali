@@ -5,33 +5,14 @@
     "assets/products/cello/c.jpg",
     "assets/products/cello/d.jpg"
   ],
-  "bluline": [
-    "assets/products/bluline/a.jpg",
-    "assets/products/bluline/b.jpg",
-    "assets/products/bluline/c.jpg",
-    "assets/products/bluline/d.jpg"
-  ],
-  "patel": [
-    "assets/products/patel/a.jpg",
-    "assets/products/patel/b.jpg",
-    "assets/products/patel/c.jpg",
-    "assets/products/patel/d.jpg"
-  ],
-  "pearl": [
-    "assets/products/pearl/a.jpg",
-    "assets/products/pearl/b.jpg",
-    "assets/products/pearl/c.jpg",
-    "assets/products/pearl/d.jpg"
-  ],
+  "bluline": [],
+  "patel": [],
+  "pearl": [],
   "aera": [
     "assets/products/aera/All Type Aera product.jpg"
   ],
   "ritu": [
     "assets/products/ritu/all type ritu brand products.jpg"
   ],
-  "other": [
-    "assets/products/other/a.jpg",
-    "assets/products/other/b.jpg",
-    "assets/products/other/c.jpg"
-  ]
+  "other": []
 }
