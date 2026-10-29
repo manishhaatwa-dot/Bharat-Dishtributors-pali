@@ -1,62 +1,13 @@
-name: Generate Product Image List
-
-on:
-  workflow_dispatch:
-  push:
-    paths:
-      - "assets/products/**"
-      - ".github/workflows/generate-products.yml"
-
-permissions:
-  contents: write
-
-jobs:
-  generate:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Generate products.json
-        run: |
-          python3 - <<'PY'
-          import json
-          from pathlib import Path
-
-          root = Path("assets/products")
-          categories = [
-              "cello", "bluline", "patel", "pearl",
-              "aera", "ritu", "other"
-          ]
-          extensions = {".jpg", ".jpeg", ".png", ".webp", ".gif"}
-          products = {}
-
-          for category in categories:
-              folder = root / category
-              products[category] = []
-
-              if folder.exists():
-                  for file in sorted(
-                      folder.rglob("*"),
-                      key=lambda p: str(p).lower()
-                  ):
-                      if file.is_file() and file.suffix.lower() in extensions:
-                          products[category].append(file.as_posix())
-
-          Path("products.json").write_text(
-              json.dumps(products, indent=2, ensure_ascii=False) + "\n",
-              encoding="utf-8"
-          )
-
-          for category, files in products.items():
-              print(f"{category}: {len(files)} images")
-          PY
-
-      - name: Commit generated file
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add products.json
-          if ! git diff --cached --quiet; then
-            git commit -m "Update product image list"
-            git push
-          fi
+{
+  "cello": [],
+  "bluline": [],
+  "patel": [],
+  "pearl": [],
+  "aera": [
+    "assets/products/aera/All Type Aera product.jpg"
+  ],
+  "ritu": [
+    "assets/products/ritu/all type ritu brand products.jpg"
+  ],
+  "other": []
+}
