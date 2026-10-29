@@ -1,25 +1,25 @@
 {
   "cello": [
-    "assets/products/cello/A.jpg",
-    "assets/products/cello/B.jpg",
+    "assets/products/cello/a.jpg",
+    "assets/products/cello/b.jpg",
     "assets/products/cello/c.jpg",
     "assets/products/cello/d.jpg"
   ],
   "bluline": [
-    "assets/products/bluline/A.jpg",
-    "assets/products/bluline/B.jpg",
+    "assets/products/bluline/a.jpg",
+    "assets/products/bluline/b.jpg",
     "assets/products/bluline/c.jpg",
     "assets/products/bluline/d.jpg"
   ],
   "patel": [
-    "assets/products/patel/A.jpg",
-    "assets/products/patel/B.jpg",
+    "assets/products/patel/a.jpg",
+    "assets/products/patel/b.jpg",
     "assets/products/patel/c.jpg",
     "assets/products/patel/d.jpg"
   ],
   "pearl": [
-    "assets/products/pearl/A.jpg",
-    "assets/products/pearl/B.jpg",
+    "assets/products/pearl/a.jpg",
+    "assets/products/pearl/b.jpg",
     "assets/products/pearl/c.jpg",
     "assets/products/pearl/d.jpg"
   ],
