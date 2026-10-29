@@ -3,88 +3,82 @@
 ===================================================== */
 
 document.addEventListener("DOMContentLoaded", () => {
-
-    // Current year
     const yearElement = document.getElementById("current-year");
 
     if (yearElement) {
         yearElement.textContent = new Date().getFullYear();
     }
 
-    // GitHub repository settings
     const GITHUB_OWNER = "manishhaatwa-dot";
     const GITHUB_REPO = "Bharat-Dishtributors-pali";
     const GITHUB_BRANCH = "main";
 
-    // Product folders and their HTML containers
+    // Folder names must match the GitHub folder names.
     const categories = {
         cello: "cello-products",
         bluline: "bluline-products",
         patel: "patel-products",
-        ritu: "ritu-products",
         pearl: "pearl-products",
         aera: "aera-products",
+        ritu: "ritu-products",
         other: "other-products"
     };
 
     const imageExtensions = [
-        ".jpg",
-        ".jpeg",
-        ".png",
-        ".webp",
-        ".gif"
+        ".jpg", ".jpeg", ".png", ".webp", ".gif"
     ];
 
-    async function loadProducts() {
-        for (const [category, containerId] of Object.entries(categories)) {
-            const container = document.getElementById(containerId);
+    const apiBase =
+        `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents`;
 
-            if (!container) continue;
+    async function getFolderContents(path) {
+        const url =
+            `${apiBase}/${path.split("/").map(encodeURIComponent).join("/")}` +
+            `?ref=${encodeURIComponent(GITHUB_BRANCH)}`;
 
-            try {
-                const apiUrl =
-                    `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/assets/products/${category}?ref=${GITHUB_BRANCH}`;
+        const response = await fetch(url, { cache: "no-store" });
 
-                const response = await fetch(apiUrl, {
-                    cache: "no-store"
-                });
+        if (response.status === 404) {
+            throw new Error(`GitHub folder not found: ${path}`);
+        }
 
-                if (!response.ok) {
-                    if (response.status === 404) {
-                        throw new Error(
-                            `Folder not found: assets/products/${category}`
-                        );
-                    }
+        if (response.status === 403) {
+            throw new Error(
+                "GitHub API rate limit exceeded. Thodi der baad dobara try karein."
+            );
+        }
 
-                    if (response.status === 403) {
-                        throw new Error(
-                            "GitHub API rate limit exceeded. Please try again later."
-                        );
-                    }
+        if (!response.ok) {
+            throw new Error(`GitHub API error: ${response.status}`);
+        }
 
-                    throw new Error(`GitHub API error: ${response.status}`);
-                }
+        const data = await response.json();
 
-                const files = await response.json();
+        if (!Array.isArray(data)) {
+            throw new Error(`Folder contents read nahi ho sake: ${path}`);
+        }
 
-                if (!Array.isArray(files)) {
-                    throw new Error("Unexpected GitHub response.");
-                }
+        return data;
+    }
 
-                const images = files.filter(file =>
-                    file.type === "file" &&
-                    imageExtensions.some(extension =>
-                        file.name.toLowerCase().endsWith(extension)
-                    )
-                );
+    function isImageFile(filename) {
+        const lower = filename.toLowerCase();
+        return imageExtensions.some(ext => lower.endsWith(ext));
+    }
 
-                renderProducts(container, images, category);
+    // Recursively collect images from a category and its subfolders.
+    async function collectImages(path, results = []) {
+        const items = await getFolderContents(path);
 
-            } catch (error) {
-                console.error(`Error loading ${category}:`, error);
-                showMessage(container, error.message, true);
+        for (const item of items) {
+            if (item.type === "file" && isImageFile(item.name)) {
+                results.push(item);
+            } else if (item.type === "dir") {
+                await collectImages(item.path, results);
             }
         }
+
+        return results;
     }
 
     function makeProductName(filename) {
@@ -94,28 +88,34 @@ document.addEventListener("DOMContentLoaded", () => {
             .replace(/\s+/g, " ")
             .trim();
 
-        // Capitalize English words; Hindi names remain unchanged.
         if (/^[a-zA-Z]/.test(name)) {
             name = name.replace(/\b[a-z]/g, letter =>
                 letter.toUpperCase()
             );
         }
 
-        return name;
+        return name || "Bharat Distributors Product";
     }
 
-    function renderProducts(container, images, category) {
+    function renderProducts(container, images) {
         container.innerHTML = "";
 
         if (!images.length) {
             showMessage(
                 container,
-                "इस कैटेगरी के प्रोडक्ट्स जल्द जोड़े जाएंगे।"
+                "इस कैटेगरी में अभी कोई प्रोडक्ट इमेज नहीं मिली।"
             );
             return;
         }
 
-        images.forEach(file => {
+        images.sort((a, b) =>
+            a.path.localeCompare(b.path, undefined, {
+                numeric: true,
+                sensitivity: "base"
+            })
+        );
+
+        for (const file of images) {
             const card = document.createElement("article");
             card.className = "product-card";
 
@@ -124,20 +124,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const image = document.createElement("img");
             image.className = "product-image";
-            image.alt = `${makeProductName(file.name)} - Bharat Distributors Pali`;
+            image.alt =
+                `${makeProductName(file.name)} - Bharat Distributors Pali`;
             image.loading = "lazy";
             image.decoding = "async";
 
-            // Use the file's GitHub download URL.
+            // Use the GitHub-provided image URL.
             image.src = file.download_url;
 
             image.onerror = () => {
-                imageWrap.innerHTML = `
-                    <div class="empty-collection">
-                        <i class="fa-regular fa-image"></i>
-                        <p>Image load नहीं हुई</p>
-                    </div>
-                `;
+                image.style.display = "none";
+
+                const errorBox = document.createElement("div");
+                errorBox.className = "empty-collection";
+
+                const message = document.createElement("p");
+                message.textContent = "Image load नहीं हुई";
+
+                errorBox.appendChild(message);
+                imageWrap.appendChild(errorBox);
             };
 
             imageWrap.appendChild(image);
@@ -149,7 +154,7 @@ document.addEventListener("DOMContentLoaded", () => {
             card.appendChild(imageWrap);
             card.appendChild(name);
             container.appendChild(card);
-        });
+        }
     }
 
     function showMessage(container, message, isError = false) {
@@ -169,6 +174,34 @@ document.addEventListener("DOMContentLoaded", () => {
         box.appendChild(icon);
         box.appendChild(text);
         container.appendChild(box);
+    }
+
+    async function loadCategory(category, containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        const folderPath = `assets/products/${category}`;
+
+        try {
+            container.innerHTML =
+                '<div class="loading-products">Products लोड हो रहे हैं...</div>';
+
+            const images = await collectImages(folderPath);
+            renderProducts(container, images);
+        } catch (error) {
+            console.error(`Error loading ${category}:`, error);
+            showMessage(container, error.message, true);
+        }
+    }
+
+    async function loadProducts() {
+        // Load categories independently so one missing folder
+        // does not stop the remaining categories from loading.
+        await Promise.all(
+            Object.entries(categories).map(([category, containerId]) =>
+                loadCategory(category, containerId)
+            )
+        );
     }
 
     loadProducts();
