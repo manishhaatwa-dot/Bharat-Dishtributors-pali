@@ -1,0 +1,34 @@
+$root = (Get-Location).Path
+$productsPath = Join-Path $root "assets\products"
+$extensions = @(".jpg", ".jpeg", ".png", ".webp", ".gif")
+
+$result = [ordered]@{
+    cello   = @()
+    bluline = @()
+    patel   = @()
+    pearl   = @()
+    aera    = @()
+    ritu    = @()
+    other   = @()
+}
+
+Get-ChildItem -Path $productsPath -Recurse -File |
+Where-Object { $extensions -contains $_.Extension.ToLowerInvariant() } |
+ForEach-Object {
+    $relative = $_.FullName.Substring($root.Length + 1).Replace("\", "/")
+    $parts = $relative.Split("/")
+
+    if ($parts.Length -ge 3) {
+        $category = $parts[2].ToLowerInvariant()
+
+        if ($result.Contains($category)) {
+            $result[$category] += $relative
+        }
+    }
+}
+
+$json = $result | ConvertTo-Json -Depth 10
+$json | Set-Content -Path (Join-Path $root "products.json") -Encoding UTF8
+
+Write-Host "products.json created successfully!"
+Write-Host "Ab products.json ko GitHub par upload/commit kar do."
