@@ -1,0 +1,97 @@
+name: Generate Product Image List
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "assets/products/**"
+      - ".github/workflows/generate-products.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  generate-products:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Generate products.json
+        shell: python
+        run: |
+          import json
+          from pathlib import Path
+
+          root = Path(".")
+          product_root = root / "assets" / "products"
+
+          categories = {
+              "cello": [],
+              "bluline": [],
+              "patel": [],
+              "pearl": [],
+              "aera": [],
+              "ritu": [],
+              "other": []
+          }
+
+          extensions = {
+              ".jpg", ".jpeg", ".png", ".webp", ".gif"
+          }
+
+          if not product_root.exists():
+              raise SystemExit("ERROR: assets/products folder not found")
+
+          folder_names = {
+              "cello": "cello",
+              "bluline": "bluline",
+              "patel": "patel",
+              "pearl": "pearl",
+              "aera": "aera",
+              "ritu": "ritu",
+              "other": "other"
+          }
+
+          for file in product_root.rglob("*"):
+              if not file.is_file():
+                  continue
+
+              if file.suffix.lower() not in extensions:
+                  continue
+
+              relative = file.relative_to(product_root)
+              category_folder = relative.parts[0].lower()
+
+              if category_folder not in folder_names:
+                  continue
+
+              category = folder_names[category_folder]
+              image_path = file.as_posix()
+
+              categories[category].append(image_path)
+
+          for category in categories:
+              categories[category].sort(key=str.lower)
+
+          output = root / "products.json"
+          output.write_text(
+              json.dumps(categories, ensure_ascii=False, indent=2) + "\n",
+              encoding="utf-8"
+          )
+
+          for category, images in categories.items():
+              print(f"{category}: {len(images)} images")
+
+      - name: Commit updated product list
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add products.json
+          if git diff --cached --quiet; then
+            echo "products.json is already up to date."
+          else
+            git commit -m "Automatically update product image list"
+            git push
+          fi
